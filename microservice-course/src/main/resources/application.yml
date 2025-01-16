@@ -1,0 +1,8 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: msvc-course
+  config:
+    import: "optional:configserver:http://localhost:8888"

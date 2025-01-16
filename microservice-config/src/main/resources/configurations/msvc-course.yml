@@ -1,0 +1,29 @@
+server:
+  port: 9090
+
+
+spring:
+  application:
+    name: msvc-course
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/coursesdb
+    username: postgres
+    password: Blacky20
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    database: postgresql
+
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
