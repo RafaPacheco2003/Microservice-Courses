@@ -6,7 +6,7 @@ import com.microservice.task.http.request.teacher.TeacherTaskRequest;
 
 import java.util.List;
 
-public interface TaskService {
+public interface TaskTeacherService {
 
     TaskDTO addTask(TeacherTaskRequest taskRequest);
     TaskDTO getTaskById(Long id);
