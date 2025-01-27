@@ -1,16 +1,17 @@
 package com.microservice.studient.service;
 
 import com.microservice.studient.dto.StudentDTO;
+import com.microservice.studient.http.request.StudentRequest;
 
 import java.util.List;
 
 public interface StudentService {
 
-    StudentDTO saveStudent(StudentDTO StudentDTO);
+    StudentDTO saveStudent(StudentRequest studentRequest);
     StudentDTO findById(Long id);
     List<StudentDTO> findAll();
     void deleteById(Long id);
-    StudentDTO updateStudent(Long id, StudentDTO studentDTO);
+    StudentDTO updateStudent(Long id, StudentRequest studentDTO);
 
 
     List<StudentDTO> findByIdCourse(Long idCourse);

@@ -1,4 +1,4 @@
-package com.microservice.task.service;
+package com.microservice.task.util.mappers;
 
 import com.microservice.task.DTO.TaskDTO;
 import com.microservice.task.entity.Task;

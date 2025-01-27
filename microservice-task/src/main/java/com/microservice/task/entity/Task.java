@@ -6,9 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Data
@@ -31,17 +29,15 @@ public class Task {
     private Date startDate;
     private Date endDate;
 
-    //Agregar agregar archivo
-    private String studentComment;
-    private boolean submitted;
-    private boolean isLate; // Indicates if the task was submitted late
+
+
     //agregar fecha de entrega
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TaskStatus status;  // Enum para el estado de la tarea
 
 
-    private Double grade; // Grade for the task (e.g., out of 10)
+
     private String teacherComment; // Additional comments or notes about the task
     private Date updatedDate; // Last update date of the task
 
@@ -52,10 +48,13 @@ public class Task {
     @Column(name = "course_id")
     private Long courseId;
 
-
+    // Relación uno a muchos con las entregas de los estudiantes
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TaskSubmission> taskSubmissions = new ArrayList<>();  // Lista de entregas asociadas a la tarea
 
     // Inicializar como una lista vacía
     @ElementCollection
     private List<Long> studentIds =  new ArrayList<>();  // Relación lógica de IDs de estudiantes, no mapeada en la base de datos
+
 
 }

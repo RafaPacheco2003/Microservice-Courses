@@ -1,9 +1,9 @@
-package com.microservice.task.service.impl.Mappers;
+package com.microservice.task.util.mappers.impl;
 
 import com.microservice.task.DTO.TaskDTO;
 import com.microservice.task.entity.Task;
 import com.microservice.task.http.request.teacher.TeacherTaskRequest;
-import com.microservice.task.service.TaskMapper;
+import com.microservice.task.util.mappers.TaskMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

@@ -24,12 +24,10 @@ public class TaskDTO {
     private Date startDate;  // Date when the task starts
     private Date endDate;  // Date when the task is due
 
-    private boolean submitted;  // If the task has been submitted
-    private boolean isLate;  // If the task was submitted late
+
     private TaskStatus status;  // Enum for the task status (DELIVERED, GRADED, RETURNED)
 
-    private Double grade;  // The grade for the task
-    private String studentComment;  // Comment from the student when submitting the task
+
     private String teacherComment;  // Comment from the teacher when grading the task
     private Date updatedDate;  // Date when the task was last updated
 

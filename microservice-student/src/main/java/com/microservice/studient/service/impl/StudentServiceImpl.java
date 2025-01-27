@@ -3,9 +3,13 @@ package com.microservice.studient.service.impl;
 import com.microservice.studient.client.CourseClient;
 import com.microservice.studient.dto.CourseDTO;
 import com.microservice.studient.entity.Student;
+import com.microservice.studient.http.request.StudentRequest;
 import com.microservice.studient.persistence.StudentRepository;
+import com.microservice.studient.service.CourseService;
 import com.microservice.studient.service.StudentService;
 import com.microservice.studient.dto.StudentDTO;
+import com.microservice.studient.util.validations.ValidationService;
+import com.microservice.studient.util.mappers.StudentMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,72 +22,66 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     private StudentRepository studentRepository;
+    @Autowired
+    private StudentMapper studentMapper;
+    @Autowired
+    private ValidationService validationService;
 
     @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
     private CourseClient courseClient;
+    @Autowired
+    private CourseService courseService;
 
     @Override
-    public StudentDTO saveStudent(StudentDTO studentDTO) {
-        Long courseId = studentDTO.getCourseId();
-        CourseDTO course = null;
-        try {
-            // Obtener el curso
-            course = courseClient.getCourseById(courseId);
-        } catch (Exception e) {
-            throw new RuntimeException("El curso con ID " + courseId + " no existe", e);
-        }
+    public StudentDTO saveStudent(StudentRequest studentRequest) {
 
-        // Mapear de StudentDTO a Student
-        Student student = modelMapper.map(studentDTO, Student.class);
 
-        // Guardar el estudiante en el repositorio
+        // Convertir StudentRequest a Student (Entidad)
+        Student student = studentMapper.CreateRequestToEntity(studentRequest);
+
+        // Guardar el estudiante en la base de datos
         Student savedStudent = studentRepository.save(student);
 
-        // Mapear el estudiante guardado a StudentDTO
-        StudentDTO savedStudentDTO = modelMapper.map(savedStudent, StudentDTO.class);
+        // Convertir la entidad guardada a StudentDTO
+        StudentDTO savedStudentDTO = studentMapper.EntityToDTO(savedStudent);
 
-        // Asignar el nombre del curso al DTO usando el método helper
+        // Asignar el nombre del curso al StudentDTO
         assignCourseNameToDTO(savedStudentDTO);
 
+        // Retornar el StudentDTO
         return savedStudentDTO;
     }
+
 
     @Override
     public StudentDTO findById(Long id) {
         // Buscar el estudiante y mapearlo a DTO
-        Student student = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
-
+        Student student = validationService.validateStudent(id);
         // Mapear el estudiante a DTO
-        StudentDTO studentDTO = modelMapper.map(student, StudentDTO.class);
+        StudentDTO studentDTO = studentMapper.EntityToDTO(student);
 
-        // Asignar el nombre del curso al DTO usando el método helper
+        // Asignar el nombre del curso al DTO usando el metodo helper
         assignCourseNameToDTO(studentDTO);
 
         return studentDTO;
     }
 
     @Override
-    public StudentDTO updateStudent(Long id, StudentDTO studentDTO) {
-        Long courseId = studentDTO.getCourseId();
-        try {
-            CourseDTO course = courseClient.getCourseById(courseId);
-        } catch (Exception e) {
-            throw new RuntimeException("El curso con ID " + courseId + " no existe");
-        }
+    public StudentDTO updateStudent(Long id, StudentRequest studentRequest) {
+        Long courseId = studentRequest.getCourseId();
+        //Obtenemos todos los cursos
+        CourseDTO course = courseService.getCourseById(courseId);
+
 
         // Buscar el estudiante existente por su ID
-        Student existingStudent = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
+        Student existingStudent = validationService.validateStudent(id);
 
-        // Crear una configuración personalizada de ModelMapper para ignorar el campo id
-        modelMapper.typeMap(StudentDTO.class, Student.class)
-                .addMappings(mapper -> mapper.skip(Student::setId));  // Ignorar el mapeo del ID
 
         // Mapear el DTO a la entidad existente sin modificar el ID
-        modelMapper.map(studentDTO, existingStudent);
+        modelMapper.map(studentRequest, existingStudent);
 
         // Guardar el estudiante actualizado en la base de datos
         Student updatedStudent = studentRepository.save(existingStudent);
@@ -120,9 +118,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void deleteById(Long id) {
         // Busca el estudiante y lanza una excepción si no existe
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
-
+        Student student = validationService.validateStudent(id);
         // Si el estudiante existe, lo eliminamos por su id
         studentRepository.deleteById(id);
     }

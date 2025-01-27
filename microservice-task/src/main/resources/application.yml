@@ -3,3 +3,12 @@ spring:
     name: msvc-task
   config:
     import: optional:configserver:http://localhost:8888
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+      location: /tmp # Opcional: Especifica una ubicación para almacenar los archivos temporalmente
+
+  storage:
+    location: uploaded-files  # La ruta donde se almacenarán los archivos

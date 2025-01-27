@@ -1,5 +1,6 @@
 package com.microservice.studient.controller;
 
+import com.microservice.studient.http.request.StudentRequest;
 import com.microservice.studient.service.StudentService;
 import com.microservice.studient.dto.StudentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,9 @@ public class StudentController {
     private StudentService studentService;
 
     @PostMapping("/create")
-    public ResponseEntity<StudentDTO> addStudent(@RequestBody StudentDTO studentDTO) {
+    public ResponseEntity<StudentDTO> addStudent(@RequestBody StudentRequest studentRequest) {
         // Usamos el metodo del servicio que mapea y guarda el Student
-        StudentDTO savedStudentDTO = studentService.saveStudent(studentDTO);
+        StudentDTO savedStudentDTO = studentService.saveStudent(studentRequest);
         return new ResponseEntity<>(savedStudentDTO, HttpStatus.CREATED);
     }
     @GetMapping("/all")
@@ -38,7 +39,7 @@ public class StudentController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody StudentDTO studentDTO) {
+    public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody StudentRequest studentDTO) {
         // Usamos el método del servicio para actualizar el estudiante y devolverlo como DTO
         StudentDTO updatedStudentDTO = studentService.updateStudent(id, studentDTO);
         return ResponseEntity.ok(updatedStudentDTO);

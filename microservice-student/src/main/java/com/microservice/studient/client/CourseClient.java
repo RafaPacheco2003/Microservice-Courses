@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "msvc-course", url = "http://localhost:8080/api/course")
 public interface CourseClient {
-    @GetMapping("/{id}")
+    @GetMapping("/search/{id}")
     CourseDTO getCourseById(@PathVariable("id") Long courseId);
 }

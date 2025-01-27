@@ -1,6 +1,8 @@
 package com.microservice.task.controller;
 
 import com.microservice.task.DTO.TaskDTO;
+import com.microservice.task.DTO.TaskSubmissionDTO;
+import com.microservice.task.http.request.teacher.GradeTaskRequest;
 import com.microservice.task.http.request.teacher.TeacherTaskGradeRequest;
 import com.microservice.task.http.request.teacher.TeacherTaskRequest;
 import com.microservice.task.service.TaskTeacherService;
@@ -58,10 +60,16 @@ public class TaskController {
         return ResponseEntity.ok(updatedTask);
     }
 
-    @PutMapping("/grade/{id}")
-    public ResponseEntity<TaskDTO> gradeTask(@PathVariable Long id, @RequestBody TeacherTaskGradeRequest gradeRequest) {
-        TaskDTO updatedTask = taskTeacherService.gradeTask(id, gradeRequest);
-        return ResponseEntity.ok(updatedTask);
+    @PostMapping("/grade/{submissionId}")
+    public ResponseEntity<TaskSubmissionDTO> gradeTaskSubmission(
+            @PathVariable Long submissionId,
+            @RequestBody GradeTaskRequest gradeTaskRequest) {
+
+        // Llamar al servicio para calificar la entrega de tarea
+        TaskSubmissionDTO gradedSubmission = taskTeacherService.gradeTaskSubmission(submissionId, gradeTaskRequest);
+
+        // Retornar la entrega actualizada
+        return ResponseEntity.ok(gradedSubmission);
     }
 
 }
