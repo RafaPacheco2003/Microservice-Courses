@@ -39,7 +39,7 @@
         - [x] Eliminar tareas.
         - [x] Ver todas las tareas de un curso.
         - [x] Ver todas las tareas asignadas a un estudiante.
-        - [ ] Ver tareas por estudiante.
+        - [ ] Ver tareas por estudiante. (Verificar si el pdf esta bien osea que se vea)
         - [x] Calificar tareas de estudiantes.
 
     - **Estudiante**:
