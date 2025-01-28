@@ -19,7 +19,7 @@
     - [x] Eliminar curso.
     - [x] Ver qué alumnos están inscritos en un curso.
     - [x] Asignar profesores a cursos.
-    - [ ] Ver las tareas asociadas a un curso.
+    - [ ] Ver las tareas asociadas a un curso.(Se realiza en el microservicios task)
     - [x] Ver qué profesor tiene asignado un curso.
 
 3. **Teacher Service**:
@@ -37,8 +37,8 @@
         - [x] Obtener información de tareas.
         - [x] Obtener detalles de tareas.
         - [x] Eliminar tareas.
-        - [ ] Ver todas las tareas de un curso.
-        - [ ] Ver todas las tareas asignadas a un estudiante.
+        - [x] Ver todas las tareas de un curso.
+        - [x] Ver todas las tareas asignadas a un estudiante.
         - [ ] Ver tareas por estudiante.
         - [x] Calificar tareas de estudiantes.
 
@@ -46,7 +46,9 @@
         - [x] Obtener información de tareas asignadas.
         - [x] Ver detalles de una tarea asignada.
         - [x] Ver todas las tareas asignadas al estudiante.
-        - [ ] Subir tareas completadas.
+        - [x] Subir tareas completadas.
+        - [ ]Que pueda ver que tarea subio
+        - [ ] que solo pueda subir una tarea
 
 ## Requisitos Técnicos
 

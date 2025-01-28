@@ -6,10 +6,12 @@ import com.microservice.task.http.request.student.TaskSubmissionRequest;
 import com.microservice.task.http.request.teacher.GradeTaskRequest;
 import com.microservice.task.service.TaskStudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Date;
 
 @RestController
@@ -29,19 +31,22 @@ public class TaskStudentController {
             @RequestParam MultipartFile pdfFile) { // El archivo PDF
 
         // Convertir la fecha de entrega desde String a Date
-        Date submissionDateParsed = new Date();// parsear la fecha, por ejemplo con SimpleDateFormat
+        Date submissionDateParsed = new Date(); // Parsear la fecha correctamente
 
-                TaskSubmissionRequest submissionRequest = new TaskSubmissionRequest();
+        TaskSubmissionRequest submissionRequest = new TaskSubmissionRequest();
         submissionRequest.setStudentComment(studentComment);
         submissionRequest.setSubmissionDate(submissionDateParsed);
         submissionRequest.setPdfFile(pdfFile); // Obtener los bytes del archivo
 
         // Llamar al servicio para entregar la tarea
-        TaskSubmissionDTO taskSubmissionDTO = taskService.submitTask(studentId, taskId, submissionRequest);
-
-        // Retornar la respuesta con el DTO de la entrega de la tarea
-        return ResponseEntity.ok(taskSubmissionDTO);
+        try {
+            TaskSubmissionDTO taskSubmissionDTO = taskService.submitTask(studentId, taskId, submissionRequest);
+            return ResponseEntity.ok(taskSubmissionDTO);
+        } catch (Exception e) { // Capturando cualquier excepción genérica
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
+
     @GetMapping("/{taskId}")
     public ResponseEntity<TaskWithSubmissionsDTO> getTaskWithSubmissions(@PathVariable Long taskId) {
         TaskWithSubmissionsDTO taskWithSubmissions = taskService.getTaskWithSubmissions(taskId);

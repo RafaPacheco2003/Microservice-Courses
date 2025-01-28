@@ -10,8 +10,10 @@ import com.microservice.task.http.request.teacher.TeacherTaskRequest;
 import com.microservice.task.persistence.TaskRepository;
 import com.microservice.task.persistence.TaskSubmissionRepository;
 import com.microservice.task.service.*;
+import com.microservice.task.util.assignments.AssignCourseAndTeacherNamesToDTO;
 import com.microservice.task.util.mappers.TaskMapper;
 import com.microservice.task.util.mappers.TaskSubmissionMapper;
+import com.microservice.task.util.mappers.impl.TaskTeacherMapperImpl;
 import com.microservice.task.util.validations.TaskValidatorService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +47,13 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
 
     @Autowired
     private TaskValidatorService taskValidator;
+    @Autowired
+    private AssignCourseAndTeacherNamesToDTO assignCourseAndTeacherNamesToDTO;
 
     @Autowired
     private StudentClient studentClient;
+    @Autowired
+    private TaskTeacherMapperImpl taskTeacherMapperImpl;
 
     @Override
     public TaskDTO addTask(TeacherTaskRequest taskRequest) {
@@ -61,9 +67,9 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
         task.setCreationDate(new Date());
 
         Task savedTask = taskRepository.save(task);
-        TaskDTO taskDTO = convertTaskToDTO(savedTask);
+        TaskDTO taskDTO = taskMapper.convertTaskToDTO(savedTask);
 
-        assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
+        assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
 
         return taskDTO;
     }
@@ -76,12 +82,12 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
         updatedTask.setStudentIds(studentIds);
 
         Task savedTask = taskRepository.save(updatedTask);
-        TaskDTO taskDTO = convertTaskToDTO(savedTask);
+        TaskDTO taskDTO = taskMapper.convertTaskToDTO(savedTask);
 
         CourseDTO course = courseService.getCourseById(updatedTask.getCourseId());
         TeacherDTO teacher = teacherService.getTeacherById(updatedTask.getTeacherId());
 
-        assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
+        assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
 
         return taskDTO;
     }
@@ -107,11 +113,12 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
         TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
         taskDTO.setStudentIds(studentIds);
 
-        assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
+        assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
 
         return taskDTO;
     }
 
+    //Ver todas las tareas de un student
     @Override
     public List<TaskDTO> getTasksByStudentId(Long studentId) {
         StudentDTO studentDTO = studentService.getStudentById(studentId);
@@ -119,18 +126,19 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
 
         return tasks.stream()
                 .map(task -> {
-                    TaskDTO taskDTO = convertTaskToDTO(task);
+                    TaskDTO taskDTO = taskMapper.convertTaskToDTO(task);
 
                     CourseDTO course = courseService.getCourseById(task.getCourseId());
                     TeacherDTO teacher = teacherService.getTeacherById(task.getTeacherId());
 
-                    assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
+                    assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
 
                     return taskDTO;
                 })
                 .collect(Collectors.toList());
     }
 
+    //Ver todas las tareas por de un course
     @Override
     public List<TaskDTO> getTasksByCourse(Long courseId) {
         CourseDTO courseDTO = courseService.getCourseById(courseId);
@@ -143,12 +151,13 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
                     dto.setStudentIds(studentIds);
 
                     TeacherDTO teacher = teacherService.getTeacherById(task.getTeacherId());
-                    assignCourseAndTeacherNamesToDTO(dto, courseDTO, teacher);
+                    assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(dto, courseDTO, teacher);
 
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public List<TaskDTO> getAllTasks() {
@@ -165,7 +174,7 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
                     CourseDTO course = courseService.getCourseById(task.getCourseId());
                     TeacherDTO teacher = teacherService.getTeacherById(task.getTeacherId());
 
-                    assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
+                    assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
 
                     return taskDTO;
                 })
@@ -184,19 +193,7 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
                 .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
-    private void assignCourseAndTeacherNamesToDTO(TaskDTO taskDTO, CourseDTO course, TeacherDTO teacher) {
-        String courseName = Optional.ofNullable(course)
-                .map(CourseDTO::getName)
-                .orElse("Course not found");
-        taskDTO.setCourseName(courseName);
 
-        String teacherName = Optional.ofNullable(teacher)
-                .map(TeacherDTO::getName)
-                .orElse("Teacher not found");
-        taskDTO.setTeacherName(teacherName);
-    }
 
-    private TaskDTO convertTaskToDTO(Task task) {
-        return modelMapper.map(task, TaskDTO.class);
-    }
+
 }

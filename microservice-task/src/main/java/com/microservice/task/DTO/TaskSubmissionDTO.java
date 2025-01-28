@@ -15,6 +15,8 @@ public class TaskSubmissionDTO {
     private String teacherComment;
     private Date submissionDate;
     private String taskTitle;  // Título de la tarea
+    private String submittedPdfFilePath;
+
 
     // Puedes agregar más detalles según necesites
 }

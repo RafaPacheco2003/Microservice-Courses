@@ -8,6 +8,7 @@ import com.microservice.task.http.request.student.TaskSubmissionRequest;
 import com.microservice.task.persistence.TaskRepository;
 import com.microservice.task.persistence.TaskSubmissionRepository;
 import com.microservice.task.service.*;
+import com.microservice.task.util.FileServiceApi;
 import com.microservice.task.util.mappers.TaskSubmissionMapper;
 import com.microservice.task.util.validations.TaskValidatorService;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,9 @@ public class TaskStudentServiceImpl implements TaskStudentService {
     private TaskRepository taskRepository;
 
     @Autowired
+    private FileServiceApi fileServiceApi;
+
+    @Autowired
     private TaskSubmissionRepository taskSubmissionRepository;
 
     @Autowired
@@ -41,8 +45,6 @@ public class TaskStudentServiceImpl implements TaskStudentService {
     @Autowired
     private CourseService courseService;
 
-    @Value("${storage.location}")  // Leemos la ubicación configurada en application.yml
-    private String storageLocation;
 
     // Entrega la tarea
     @Override
@@ -56,12 +58,26 @@ public class TaskStudentServiceImpl implements TaskStudentService {
         // Guardar el archivo en el servidor
         String storedFilePath = saveFile(pdfFile);
 
+        // Crear la entidad de entrega de la tarea
         TaskSubmission taskSubmission = createTaskSubmission(studentId, submissionRequest, task, storedFilePath);
+
+        // Guardar la entrega de la tarea en la base de datos
         TaskSubmission savedSubmission = taskSubmissionRepository.save(taskSubmission);
 
         return taskSubmissionMapper.convertToDTO(savedSubmission);
     }
+    private String saveFile(MultipartFile file) {
+        // Llama al servicio de archivos para guardar el archivo
+        try {
+            fileServiceApi.save(file);
+            // Retorna la ruta del archivo guardado
+            return file.getOriginalFilename();  // Por ejemplo, almacenas solo el nombre del archivo
 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        }
     // Obtengo una tarea con sus entregas
     @Override
     public TaskWithSubmissionsDTO getTaskWithSubmissions(Long taskId) {
@@ -85,32 +101,6 @@ public class TaskStudentServiceImpl implements TaskStudentService {
                 .build();
     }
 
-    // Guardar el archivo PDF en el servidor
-    private String saveFile(MultipartFile file) {
-        // Verificar que el archivo no esté vacío
-        if (file.isEmpty()) {
-            throw new RuntimeException("No se proporcionó un archivo PDF.");
-        }
-
-        try {
-            // Crear un directorio si no existe
-            File dir = new File(storageLocation);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            // Guardar el archivo en el directorio configurado
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            File serverFile = new File(dir, fileName);
-            try (FileOutputStream fos = new FileOutputStream(serverFile)) {
-                fos.write(file.getBytes());
-            }
-
-            return serverFile.getAbsolutePath();  // Retornar la ruta completa del archivo
-        } catch (IOException e) {
-            throw new RuntimeException("Error al guardar el archivo.", e);
-        }
-    }
 
     // Crear la entrega de la tarea
     private TaskSubmission createTaskSubmission(Long studentId, TaskSubmissionRequest submissionRequest, Task task, String storedFilePath) {
@@ -121,7 +111,6 @@ public class TaskStudentServiceImpl implements TaskStudentService {
         taskSubmission.setLate(taskValidator.isLate(task.getEndDate(), submissionRequest.getSubmissionDate()));
         taskSubmission.setSubmissionDate(submissionRequest.getSubmissionDate());
         taskSubmission.setPdfFile(storedFilePath);  // Guardar la ruta del archivo en la base de datos
-
         taskSubmission.setTask(task);
         return taskSubmission;
     }
