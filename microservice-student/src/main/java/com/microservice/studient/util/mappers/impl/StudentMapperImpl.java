@@ -19,8 +19,8 @@ public class StudentMapperImpl implements StudentMapper {
     }
 
     @Override
-    public Student UpdateRequestToEntity(Long id, StudentRequest studentRequest) {
-        return null;
+    public void UpdateRequestToEntity(StudentRequest studentRequest, Student existingStudent) {
+        modelMapper.map(studentRequest, existingStudent);
     }
 
     @Override

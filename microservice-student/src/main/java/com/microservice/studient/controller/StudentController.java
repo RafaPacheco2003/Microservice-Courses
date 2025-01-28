@@ -1,6 +1,7 @@
 package com.microservice.studient.controller;
 
 import com.microservice.studient.http.request.StudentRequest;
+import com.microservice.studient.http.response.StudentDetailsDTO;
 import com.microservice.studient.service.StudentService;
 import com.microservice.studient.dto.StudentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,8 @@ public class StudentController {
 
 
     //Comunicacon entre el microserve de course
+
+    //Search student by courseId
     @GetMapping("/search-by-course/{idCourse}")
     public ResponseEntity<List<StudentDTO>> findByIdCourse(@PathVariable Long idCourse) {
         // Retornamos una lista de StudentDTOs filtrados por curso
@@ -64,5 +67,12 @@ public class StudentController {
     public ResponseEntity<Void> updateStudentsCourseId(@PathVariable Long id) {
         studentService.updateStudentsCourseId(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/details/{id}")
+    public ResponseEntity<StudentDetailsDTO> getStudentDetails(@PathVariable Long id) {
+        StudentDetailsDTO studentDetailsDTO = studentService.findStudentDetailsById(id);
+
+        return new ResponseEntity<>(studentDetailsDTO, HttpStatus.OK);
     }
 }

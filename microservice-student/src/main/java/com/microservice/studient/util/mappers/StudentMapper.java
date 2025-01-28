@@ -6,6 +6,6 @@ import com.microservice.studient.http.request.StudentRequest;
 
 public interface StudentMapper {
     Student CreateRequestToEntity(StudentRequest studentRequest);
-    Student UpdateRequestToEntity(Long id, StudentRequest studentRequest);
+    void UpdateRequestToEntity(StudentRequest studentRequest, Student student);
     StudentDTO EntityToDTO(Student student);
 }

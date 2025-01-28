@@ -4,14 +4,12 @@
 
 1. **Student Service**:
     - [x] Registrar estudiantes.
-    - [ ] Asignar estudiante a curso.
     - [x] Editar información de estudiantes.
     - [x] Eliminar estudiante.
     - [x] Obtener información de estudiante.
     - [x] Listar estudiantes.
-    - [x] Ver en qué curso está el estudiante.
-    - [ ] Ver qué profesor tiene asignado el estudiante.
-    - [ ] Ver todas las tareas del estudiante.
+    - [x] Ver qué profesor tiene asignado el estudiante.
+    - [x] Ver todas las tareas del estudiante.(Se ve en el microservice task)
 
 2. **Course Service**:
     - [x] Crear cursos.
@@ -22,7 +20,7 @@
     - [x] Ver qué alumnos están inscritos en un curso.
     - [x] Asignar profesores a cursos.
     - [ ] Ver las tareas asociadas a un curso.
-    - [ ] Ver qué profesor tiene asignado un curso.
+    - [x] Ver qué profesor tiene asignado un curso.
 
 3. **Teacher Service**:
     - [x] Registrar profesores.

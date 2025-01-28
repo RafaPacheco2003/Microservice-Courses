@@ -1,11 +1,11 @@
-package com.microservice.task.service.impl;
+package com.microservice.task.util.validations.impl;
 
 import com.microservice.task.entity.Task;
 import com.microservice.task.entity.TaskSubmission;
 import com.microservice.task.persistence.TaskRepository;
 import com.microservice.task.persistence.TaskSubmissionRepository;
 import com.microservice.task.service.StudentService;
-import com.microservice.task.service.TaskValidatorService;
+import com.microservice.task.util.validations.TaskValidatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

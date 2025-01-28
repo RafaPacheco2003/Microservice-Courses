@@ -1,7 +1,9 @@
 package com.microservice.studient.service;
 
 import com.microservice.studient.dto.StudentDTO;
+import com.microservice.studient.dto.TeacherDTO;
 import com.microservice.studient.http.request.StudentRequest;
+import com.microservice.studient.http.response.StudentDetailsDTO;
 
 import java.util.List;
 
@@ -16,5 +18,6 @@ public interface StudentService {
 
     List<StudentDTO> findByIdCourse(Long idCourse);
     void updateStudentsCourseId(Long idCourse);
+    StudentDetailsDTO findStudentDetailsById(Long id);
 
 }

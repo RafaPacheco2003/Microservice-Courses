@@ -2,12 +2,17 @@ package com.microservice.studient.service.impl;
 
 import com.microservice.studient.client.CourseClient;
 import com.microservice.studient.dto.CourseDTO;
+import com.microservice.studient.dto.TeacherDTO;
 import com.microservice.studient.entity.Student;
+import com.microservice.studient.exception.StudentNotFoundException;
 import com.microservice.studient.http.request.StudentRequest;
+import com.microservice.studient.http.response.StudentDetailsDTO;
 import com.microservice.studient.persistence.StudentRepository;
 import com.microservice.studient.service.CourseService;
 import com.microservice.studient.service.StudentService;
 import com.microservice.studient.dto.StudentDTO;
+import com.microservice.studient.service.TeacherService;
+import com.microservice.studient.util.assignments.AssignCourseNameToDTO;
 import com.microservice.studient.util.validations.ValidationService;
 import com.microservice.studient.util.mappers.StudentMapper;
 import org.modelmapper.ModelMapper;
@@ -17,6 +22,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the StudentService interface that handles the business logic
+ * related to the Student entity.
+ */
 @Service
 public class StudentServiceImpl implements StudentService {
 
@@ -26,144 +35,185 @@ public class StudentServiceImpl implements StudentService {
     private StudentMapper studentMapper;
     @Autowired
     private ValidationService validationService;
-
+    @Autowired
+    private AssignCourseNameToDTO assignCourseNameToDTO;
     @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private CourseClient courseClient;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private TeacherService teacherService;
 
+    /**
+     * Saves a new student by converting the StudentRequest to a Student entity,
+     * saving it in the database, and returning a StudentDTO with course information.
+     *
+     * @param studentRequest the student request data
+     * @return the saved student as a StudentDTO
+     */
     @Override
     public StudentDTO saveStudent(StudentRequest studentRequest) {
-
-
-        // Convertir StudentRequest a Student (Entidad)
+        // Convert StudentRequest to Student entity
         Student student = studentMapper.CreateRequestToEntity(studentRequest);
 
-        // Guardar el estudiante en la base de datos
+        // Save the student to the database
         Student savedStudent = studentRepository.save(student);
 
-        // Convertir la entidad guardada a StudentDTO
+        // Convert the saved entity to StudentDTO
         StudentDTO savedStudentDTO = studentMapper.EntityToDTO(savedStudent);
 
-        // Asignar el nombre del curso al StudentDTO
-        assignCourseNameToDTO(savedStudentDTO);
+        // Assign course name to the StudentDTO
+        assignCourseNameToDTO.assignCourseNameToDTO(savedStudentDTO);
 
-        // Retornar el StudentDTO
+        // Return the DTO with course information
         return savedStudentDTO;
     }
 
-
+    /**
+     * Finds a student by its ID, validates its existence, and returns a StudentDTO
+     * with course information.
+     *
+     * @param id the student ID
+     * @return the student as a StudentDTO
+     */
     @Override
     public StudentDTO findById(Long id) {
-        // Buscar el estudiante y mapearlo a DTO
+        // Validate and retrieve the student by ID
         Student student = validationService.validateStudent(id);
-        // Mapear el estudiante a DTO
+
+        // Map the student entity to StudentDTO
         StudentDTO studentDTO = studentMapper.EntityToDTO(student);
 
-        // Asignar el nombre del curso al DTO usando el metodo helper
-        assignCourseNameToDTO(studentDTO);
+        // Assign course name to the DTO
+        assignCourseNameToDTO.assignCourseNameToDTO(studentDTO);
 
+        // Return the DTO
         return studentDTO;
     }
 
+    /**
+     * Updates an existing student based on the provided ID and request data. The
+     * student is validated, updated, and saved. The updated student is returned as
+     * a StudentDTO with course information.
+     *
+     * @param id the student ID
+     * @param studentRequest the updated student data
+     * @return the updated student as a StudentDTO
+     */
     @Override
     public StudentDTO updateStudent(Long id, StudentRequest studentRequest) {
-        Long courseId = studentRequest.getCourseId();
-        //Obtenemos todos los cursos
-        CourseDTO course = courseService.getCourseById(courseId);
+        // Retrieve course information based on course ID
+        CourseDTO course = courseService.getCourseById(studentRequest.getCourseId());
 
-
-        // Buscar el estudiante existente por su ID
+        // Validate and retrieve the existing student by ID
         Student existingStudent = validationService.validateStudent(id);
 
+        // Update the existing student entity using the request data
+        studentMapper.UpdateRequestToEntity(studentRequest, existingStudent);
 
-        // Mapear el DTO a la entidad existente sin modificar el ID
-        modelMapper.map(studentRequest, existingStudent);
-
-        // Guardar el estudiante actualizado en la base de datos
+        // Save the updated student to the database
         Student updatedStudent = studentRepository.save(existingStudent);
 
-        // Mapear el estudiante actualizado a DTO
-        StudentDTO updatedStudentDTO = modelMapper.map(updatedStudent, StudentDTO.class);
+        // Map the updated entity to StudentDTO
+        StudentDTO updatedStudentDTO = studentMapper.EntityToDTO(updatedStudent);
 
-        // Asignar el nombre del curso al DTO actualizado
-        assignCourseNameToDTO(updatedStudentDTO);
+        // Assign course name to the updated DTO
+        assignCourseNameToDTO.assignCourseNameToDTO(updatedStudentDTO);
 
+        // Return the updated DTO
         return updatedStudentDTO;
     }
 
+    /**
+     * Retrieves all students, maps them to DTOs, and assigns the course name to each.
+     *
+     * @return a list of students as StudentDTOs
+     */
     @Override
     public List<StudentDTO> findAll() {
+        // Retrieve all students from the repository
         List<Student> students = (List<Student>) studentRepository.findAll();
 
-        // Mapeamos los estudiantes a DTOs
-        List<StudentDTO> studentDTOs = students.stream().map(student -> {
-            // Mapear a StudentDTO
-            StudentDTO studentDTO = modelMapper.map(student, StudentDTO.class);
+        // Map each student entity to StudentDTO and assign course names
+        List<StudentDTO> studentDTOs = students.stream()
+                .map(student -> {
+                    // Convert to StudentDTO
+                    StudentDTO studentDTO = studentMapper.EntityToDTO(student);
 
-            // Asignar el nombre del curso al StudentDTO usando el método helper
-            assignCourseNameToDTO(studentDTO);
+                    // Assign course name
+                    assignCourseNameToDTO.assignCourseNameToDTO(studentDTO);
 
-            return studentDTO;
-        }).collect(Collectors.toList());
+                    return studentDTO;
+                }).collect(Collectors.toList());
 
+        // Return the list of DTOs
         return studentDTOs;
     }
 
-
-
+    /**
+     * Deletes a student by its ID after validating its existence.
+     *
+     * @param id the student ID
+     */
     @Override
     public void deleteById(Long id) {
-        // Busca el estudiante y lanza una excepción si no existe
+        // Validate and retrieve the student by ID
         Student student = validationService.validateStudent(id);
-        // Si el estudiante existe, lo eliminamos por su id
+
+        // Delete the student by its ID
         studentRepository.deleteById(id);
     }
 
-    /*
-    Comunicaciones con el course
+    /**
+     * Finds all students by a specific course ID and maps them to StudentDTOs.
+     *
+     * @param idCourse the course ID
+     * @return a list of students as StudentDTOs
      */
     @Override
     public List<StudentDTO> findByIdCourse(Long idCourse) {
-        // Obtener estudiantes por curso y mapearlos a DTO
+        // Retrieve all students by course ID
         List<Student> students = studentRepository.findAllStudents(idCourse);
+
+        // Map each student entity to StudentDTO
         return students.stream()
                 .map(student -> modelMapper.map(student, StudentDTO.class))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates all students that are associated with a given course ID by setting
+     * the course ID to null (removing the association).
+     *
+     * @param idCourse the course ID to disassociate from students
+     */
     @Override
     public void updateStudentsCourseId(Long idCourse) {
-        // Actualizar a todos los estudiantes que tienen este courseId y ponerlo a 0
+        // Retrieve all students by course ID
         List<Student> students = studentRepository.findAllStudents(idCourse);
+
+        // Set course ID to null for each student
         students.forEach(student -> student.setCourseId(null));
+
+        // Save the updated students
         studentRepository.saveAll(students);
     }
 
+    @Override
+    public StudentDetailsDTO findStudentDetailsById(Long id) {
 
+        Student student = validationService.validateStudent(id);
+        CourseDTO course = courseService.getCourseById(student.getCourseId());
+        TeacherDTO teacher = teacherService.getTeacherById(course.getId());
 
+        return StudentDetailsDTO.builder()
+                .id(student.getId())
+                .name(student.getName() + " " + student.getLastName())
+                .courseId(course.getId())
+                .email(student.getEmail())
+                .courseName(course.getName())
+                .teacher(teacher)
+                .build();
 
-
-    // Metodo auxiliar para asignar el nombre del curso al StudentDTO
-    private void assignCourseNameToDTO(StudentDTO studentDTO) {
-        Long courseId = studentDTO.getCourseId();
-        CourseDTO course = null;
-        try {
-            course = courseClient.getCourseById(courseId);
-        } catch (Exception e) {
-            // Manejar error si no se puede obtener el curso
-            System.out.println("Error obteniendo el curso para el estudiante con ID: " + studentDTO.getId());
-        }
-
-        // Asignar el nombre del curso al StudentDTO
-        if (course != null) {
-            studentDTO.setCourseName(course.getName());
-        } else {
-            studentDTO.setCourseName("Course not found");
-        }
     }
-
 }
