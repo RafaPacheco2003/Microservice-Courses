@@ -3,9 +3,7 @@ import com.microservice.task.DTO.*;
 import com.microservice.task.client.StudentClient;
 
 import com.microservice.task.entity.Task;
-import com.microservice.task.entity.TaskSubmission;
 import com.microservice.task.exception.TaskNotFoundException;
-import com.microservice.task.http.request.teacher.GradeTaskRequest;
 import com.microservice.task.http.request.teacher.TeacherTaskRequest;
 import com.microservice.task.persistence.TaskRepository;
 import com.microservice.task.persistence.TaskSubmissionRepository;
@@ -20,11 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class TaskTeacherServiceImpl implements TaskTeacherService {
+public class TaskServiceImpl implements TaskService {
     @Autowired
     private ModelMapper modelMapper;
 
@@ -61,6 +58,7 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
         TeacherDTO teacher = teacherService.getTeacherById(taskRequest.getTeacherId());
 
         Task task = taskMapper.convertRequestToTask(taskRequest);
+
         List<Long> studentIds = studentService.getStudentIdsByCourse(taskRequest.getCourseId());
 
         task.setStudentIds(studentIds);
@@ -90,17 +88,6 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
         assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
 
         return taskDTO;
-    }
-
-    @Override
-    public TaskSubmissionDTO gradeTaskSubmission(Long submissionId, GradeTaskRequest gradeTaskRequest) {
-        TaskSubmission taskSubmission = taskValidator.validateSubmissionExists(submissionId);
-        taskSubmission.setGrade(gradeTaskRequest.getGrade());
-        taskSubmission.setTeacherComment(gradeTaskRequest.getTeacherComment());
-        taskSubmission.setGradeDate(new Date());
-
-        TaskSubmission updatedSubmission = taskSubmissionRepository.save(taskSubmission);
-        return taskSubmissionMapper.convertToDTO(updatedSubmission);
     }
 
     @Override
@@ -157,7 +144,6 @@ public class TaskTeacherServiceImpl implements TaskTeacherService {
                 })
                 .collect(Collectors.toList());
     }
-
 
     @Override
     public List<TaskDTO> getAllTasks() {

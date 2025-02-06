@@ -1,6 +1,7 @@
 package com.microservice.task.util;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,18 +31,31 @@ public class FileServiceApiImpl implements FileServiceApi {
 
     @Override
     public Resource load(String filename) throws Exception {
-        return null;
+        Path file = rootFolder.resolve(filename);
+        if (Files.exists(file)) {
+            return new FileSystemResource(file);
+        } else {
+            throw new IOException("Archivo no encontrado: " + filename);
+        }
     }
+
+    // Nuevo método para cargar todos los archivos
+    @Override
+    public Stream<Path> loadAll() throws Exception {
+        try {
+            return Files.walk(rootFolder, 1)  // 1 es para obtener solo el contenido del directorio
+                    .filter(path -> !path.equals(rootFolder))  // Filtramos la ruta raíz
+                    .map(rootFolder::relativize);  // Relativizamos las rutas
+        } catch (IOException e) {
+            throw new IOException("No se pudieron cargar los archivos", e);
+        }
+    }
+
 
     @Override
     public void save(List<MultipartFile> files) throws Exception {
         for (MultipartFile file : files) {
             this.save(file);
         }
-    }
-
-    @Override
-    public Stream<Path> loadAll() throws Exception {
-        return Stream.empty();
     }
 }

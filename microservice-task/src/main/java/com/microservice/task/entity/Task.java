@@ -25,6 +25,7 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private TaskType type;  // Enum para el estado de la tarea
+
     private Date creationDate; // Date when the task was created
     private Date startDate;
     private Date endDate;

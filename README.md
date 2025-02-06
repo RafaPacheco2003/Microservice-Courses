@@ -39,7 +39,7 @@
         - [x] Eliminar tareas.
         - [x] Ver todas las tareas de un curso.
         - [x] Ver todas las tareas asignadas a un estudiante.
-        - [ ] Ver tareas por estudiante. (Verificar si el pdf esta bien osea que se vea)
+        - [ ] Ver tareas por estudiante. (Verificar si el pdf esta bien osea que se vea) listo solo falta ajustarlo al controller
         - [x] Calificar tareas de estudiantes.
 
     - **Estudiante**:
@@ -47,9 +47,11 @@
         - [x] Ver detalles de una tarea asignada.
         - [x] Ver todas las tareas asignadas al estudiante.
         - [x] Subir tareas completadas.
-        - [ ]Que pueda ver que tarea subio
-        - [ ] que solo pueda subir una tarea
+        - [x]Que pueda ver que tarea subio
 
+
+
+!!Configurar validaciones de si se entrego tarde la tareas, ajustar fecha y agregar la parte de calificacion final 
 ## Requisitos Técnicos
 
 - **Spring Boot**.

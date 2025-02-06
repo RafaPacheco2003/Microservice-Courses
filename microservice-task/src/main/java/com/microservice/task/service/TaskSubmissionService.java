@@ -5,8 +5,8 @@ import com.microservice.task.DTO.TaskWithSubmissionsDTO;
 import com.microservice.task.http.request.student.TaskSubmissionRequest;
 import com.microservice.task.http.request.teacher.GradeTaskRequest;
 
-public interface TaskStudentService {
+public interface TaskSubmissionService {
     TaskSubmissionDTO submitTask(Long studentId, Long taskId, TaskSubmissionRequest submissionRequest);
     TaskWithSubmissionsDTO getTaskWithSubmissions(Long taskId);
-
+    TaskSubmissionDTO gradeTaskSubmission(Long teacherId, Long submissionId, GradeTaskRequest gradeRequest);
 }

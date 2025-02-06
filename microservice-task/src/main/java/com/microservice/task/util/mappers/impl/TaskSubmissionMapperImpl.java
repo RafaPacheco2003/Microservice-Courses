@@ -16,12 +16,11 @@ public class TaskSubmissionMapperImpl implements TaskSubmissionMapper {
         dto.setId(taskSubmission.getId());
         dto.setStudentId(taskSubmission.getStudentId());
         dto.setSubmitted(taskSubmission.isSubmitted());
-        dto.setLate(taskSubmission.isLate());
         dto.setStudentComment(taskSubmission.getStudentComment());
         dto.setGrade(taskSubmission.getGrade());
+        dto.setGradeDate(taskSubmission.getGradeDate());
         dto.setTeacherComment(taskSubmission.getTeacherComment());
         dto.setSubmissionDate(taskSubmission.getSubmissionDate());
-        dto.setTaskTitle(taskSubmission.getTask().getTitle());
         dto.setSubmittedPdfFilePath(taskSubmission.getPdfFile());
         return dto;
     }

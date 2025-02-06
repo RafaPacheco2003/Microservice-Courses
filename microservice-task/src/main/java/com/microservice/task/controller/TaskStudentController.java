@@ -1,56 +1,107 @@
 package com.microservice.task.controller;
 
+import com.microservice.task.DTO.TaskDTO;
 import com.microservice.task.DTO.TaskSubmissionDTO;
 import com.microservice.task.DTO.TaskWithSubmissionsDTO;
 import com.microservice.task.http.request.student.TaskSubmissionRequest;
 import com.microservice.task.http.request.teacher.GradeTaskRequest;
-import com.microservice.task.service.TaskStudentService;
+import com.microservice.task.service.TaskService;
+import com.microservice.task.service.TaskSubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+
+/**
+ * Este controller puede buscar tareas por su id y por el course que tiene y podra subir las tareas que tenga asignadas
+ */
 
 @RestController
 @RequestMapping("/student/tasks")
 public class TaskStudentController {
 
     @Autowired
-    private TaskStudentService taskService;
+    private TaskSubmissionService taskSubmissionService;
+    @Autowired
+    private TaskService taskService;
 
 
+
+    //Obtener task por tyaskId
+    @GetMapping("/search/{taskId}")
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable("taskId") Long taskId) {
+        return ResponseEntity.ok().body(taskService.getTaskById(taskId));
+    }
+    //Obtener tarea por el course
+    @GetMapping("/serach-task-by-courseId/{courseId}")
+    public ResponseEntity<List<TaskDTO> > getTaskByCourseId(@PathVariable Long courseId) {
+        List<TaskDTO> tasksDTO = taskService.getTasksByCourse(courseId);
+        return ResponseEntity.ok(tasksDTO);
+    }
+
+    //Obtener la tarea por el id de student por token
+    @GetMapping("/{studentId}")
+    public ResponseEntity<List<TaskDTO>> getTasksByStudentId(@PathVariable Long studentId) {
+        List<TaskDTO> tasksDTO = taskService.getTasksByStudentId(studentId);
+        return ResponseEntity.ok(tasksDTO);
+    }
+
+
+    //Submit task
     @PostMapping("/{taskId}/submit/{studentId}")
-    public ResponseEntity<TaskSubmissionDTO> submitTask(
+    public ResponseEntity<?> submitTask(
             @PathVariable Long taskId,
             @PathVariable Long studentId,
-            @RequestParam String studentComment, // El comentario del estudiante
-            @RequestParam String submissionDate, // La fecha de entrega
-            @RequestParam MultipartFile pdfFile) { // El archivo PDF
+            @RequestParam String studentComment,
+            @RequestParam String submissionDate,
+            @RequestParam MultipartFile pdfFile) {
 
-        // Convertir la fecha de entrega desde String a Date
-        Date submissionDateParsed = new Date(); // Parsear la fecha correctamente
+        // Convertir la fecha de entrega desde String a Date (usando el formato ISO 8601)
+        Date submissionDateParsed;
+        try {
+            submissionDateParsed = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(submissionDate); // Formato ISO 8601
+        } catch (ParseException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Error: La fecha de entrega no tiene el formato correcto. Formato esperado: yyyy-MM-dd'T'HH:mm:ss");
+        }
 
         TaskSubmissionRequest submissionRequest = new TaskSubmissionRequest();
         submissionRequest.setStudentComment(studentComment);
         submissionRequest.setSubmissionDate(submissionDateParsed);
-        submissionRequest.setPdfFile(pdfFile); // Obtener los bytes del archivo
+        submissionRequest.setPdfFile(pdfFile);
 
-        // Llamar al servicio para entregar la tarea
         try {
-            TaskSubmissionDTO taskSubmissionDTO = taskService.submitTask(studentId, taskId, submissionRequest);
+            TaskSubmissionDTO taskSubmissionDTO = taskSubmissionService.submitTask(studentId, taskId, submissionRequest);
             return ResponseEntity.ok(taskSubmissionDTO);
-        } catch (Exception e) { // Capturando cualquier excepción genérica
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno del servidor: " + e.getMessage());
         }
     }
 
-    @GetMapping("/{taskId}")
-    public ResponseEntity<TaskWithSubmissionsDTO> getTaskWithSubmissions(@PathVariable Long taskId) {
-        TaskWithSubmissionsDTO taskWithSubmissions = taskService.getTaskWithSubmissions(taskId);
-        return ResponseEntity.ok(taskWithSubmissions);
+
+
+
+    // Endpoint para calificar una entrega
+    @PostMapping("/grade/{teacherId}/{submissionId}")
+    public ResponseEntity<TaskSubmissionDTO> gradeTaskSubmission(
+            @PathVariable Long teacherId,
+            @PathVariable Long submissionId,
+            @RequestBody GradeTaskRequest gradeRequest) {
+
+        // Llamar al servicio para calificar la entrega
+        TaskSubmissionDTO updatedSubmission = taskSubmissionService.gradeTaskSubmission(teacherId, submissionId, gradeRequest);
+
+        // Devolver la respuesta con el DTO actualizado
+        return ResponseEntity.ok(updatedSubmission);
     }
+
+
 
 }
