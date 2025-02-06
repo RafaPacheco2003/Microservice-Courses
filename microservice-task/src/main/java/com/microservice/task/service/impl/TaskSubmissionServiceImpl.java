@@ -61,7 +61,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         String storedFilePath = saveFile(pdfFile);
 
         // Crear la entidad de entrega de la tarea
-        TaskSubmission taskSubmission = createTaskSubmission(studentId, submissionRequest, task, storedFilePath);
+        TaskSubmission taskSubmission = taskSubmissionMapper.convertTaskSubmissionRequestToEntity(studentId, submissionRequest, task, storedFilePath);
 
         // Guardar la entrega de la tarea en la base de datos
         TaskSubmission savedSubmission = taskSubmissionRepository.save(taskSubmission);
@@ -154,17 +154,4 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
                 .build();
     }
 
-
-    // Crear la entrega de la tarea
-    private TaskSubmission createTaskSubmission(Long studentId, TaskSubmissionRequest submissionRequest, Task task, String storedFilePath) {
-        TaskSubmission taskSubmission = new TaskSubmission();
-        taskSubmission.setStudentId(studentId);
-        taskSubmission.setSubmitted(true);
-        taskSubmission.setStudentComment(submissionRequest.getStudentComment());
-        taskSubmission.setLate(taskValidator.isLate(task.getEndDate(), submissionRequest.getSubmissionDate()));
-        taskSubmission.setSubmissionDate(submissionRequest.getSubmissionDate());
-        taskSubmission.setPdfFile(storedFilePath);  // Guardar la ruta del archivo en la base de datos
-        taskSubmission.setTask(task);
-        return taskSubmission;
-    }
 }

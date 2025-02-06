@@ -24,15 +24,11 @@ public class TaskTeacherController {
         TaskDTO savedTask= taskTeacherService.addTask(taskRequest);
         return ResponseEntity.ok().body(savedTask);
     }
-
-    //Obtener task con entregas by taskId
-    @GetMapping("/details/{taskId}")
-    public ResponseEntity<TaskWithSubmissionsDTO> getTaskWithSubmissions(@PathVariable Long taskId) {
-        TaskWithSubmissionsDTO taskWithSubmissions = taskSubmissionService.getTaskWithSubmissions(taskId);
-        return ResponseEntity.ok(taskWithSubmissions);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TeacherTaskRequest taskRequest) {
+        TaskDTO updatedTask = taskTeacherService.updateTask(id, taskRequest);
+        return ResponseEntity.ok(updatedTask);
     }
-
-
     @GetMapping("/search-task-by-studentId/{studentId}")
     public ResponseEntity<List<TaskDTO>> getTasksByStudent(@PathVariable("studentId") Long studentId) {
         System.out.println("Entrando a student");
@@ -52,7 +48,12 @@ public class TaskTeacherController {
         return ResponseEntity.ok().body(taskTeacherService.getTaskById(id));
     }
 
-
+    //Obtener task con entregas by taskId
+    @GetMapping("/details/{taskId}")
+    public ResponseEntity<TaskWithSubmissionsDTO> getTaskWithSubmissions(@PathVariable Long taskId) {
+        TaskWithSubmissionsDTO taskWithSubmissions = taskSubmissionService.getTaskWithSubmissions(taskId);
+        return ResponseEntity.ok(taskWithSubmissions);
+    }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteTaskById(@PathVariable("id") Long id) {
         taskTeacherService.deleteTask(id);
@@ -65,11 +66,12 @@ public class TaskTeacherController {
         List<TaskDTO> taskDTOList = taskTeacherService.getAllTasks();
         return ResponseEntity.ok(taskDTOList);
     }
-    @PutMapping("/update/{id}")
-    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TeacherTaskRequest taskRequest) {
-        TaskDTO updatedTask = taskTeacherService.updateTask(id, taskRequest);
-        return ResponseEntity.ok(updatedTask);
-    }
+
+
+
+
+
+
 
 
 }
