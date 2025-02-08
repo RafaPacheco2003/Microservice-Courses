@@ -25,10 +25,9 @@ public class TaskDTO {
     private Date endDate;  // Date when the task is due
 
 
-    private TaskStatus status;  // Enum for the task status (DELIVERED, GRADED, RETURNED)
+    //private TaskStatus status;  // Enum for the task status (DELIVERED, GRADED, RETURNED)
 
 
-    private String teacherComment;  // Comment from the teacher when grading the task
     private Date updatedDate;  // Date when the task was last updated
 
     private Long teacherId;  // ID of the teacher

@@ -9,4 +9,5 @@ public interface TaskSubmissionService {
     TaskSubmissionDTO submitTask(Long studentId, Long taskId, TaskSubmissionRequest submissionRequest);
     TaskWithSubmissionsDTO getTaskWithSubmissions(Long taskId);
     TaskSubmissionDTO gradeTaskSubmission(Long teacherId, Long submissionId, GradeTaskRequest gradeRequest);
+    TaskWithSubmissionsDTO getTaskWithSubmissionsForStudent(Long studentId, Long taskId);
 }

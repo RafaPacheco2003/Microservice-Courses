@@ -1,5 +1,6 @@
 package com.microservice.task.service.impl;
 
+import com.microservice.task.DTO.StudentDTO;
 import com.microservice.task.DTO.TaskSubmissionDTO;
 import com.microservice.task.DTO.TaskWithSubmissionsDTO;
 import com.microservice.task.DTO.TeacherDTO;
@@ -25,6 +26,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
 
     @Autowired
     private TaskRepository taskRepository;
+
 
     @Autowired
     private FileServiceApi fileServiceApi;
@@ -63,6 +65,8 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         // Crear la entidad de entrega de la tarea
         TaskSubmission taskSubmission = taskSubmissionMapper.convertTaskSubmissionRequestToEntity(studentId, submissionRequest, task, storedFilePath);
 
+        taskSubmission.setSubmissionDate(new Date());
+        taskSubmission.setSubmitted(true);
         // Guardar la entrega de la tarea en la base de datos
         TaskSubmission savedSubmission = taskSubmissionRepository.save(taskSubmission);
 
@@ -103,6 +107,71 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
 
 
 
+    // Obtengo una tarea con sus entregas de los student
+    @Override
+    public TaskWithSubmissionsDTO getTaskWithSubmissions(Long taskId) {
+        Task task = taskValidator.validateTaskExists(taskId);
+        List<TaskSubmission> taskSubmissions = taskSubmissionRepository.findByTaskId(taskId);
+        List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertToDTOList(taskSubmissions);
+
+        return TaskWithSubmissionsDTO.builder()
+                .taskId(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .type(task.getType())
+                .creationDate(task.getCreationDate())
+                .startDate(task.getStartDate())
+                .endDate(task.getEndDate())
+                .teacherId(task.getTeacherId())
+                .courseId(task.getCourseId())
+                .submissions(taskSubmissionDTOs)
+                .build();
+    }
+    @Override
+    public TaskWithSubmissionsDTO getTaskWithSubmissionsForStudent(Long studentId, Long taskId) {
+        //Obtengo task
+        Task task = taskValidator.validateTaskExists(taskId);
+        //Obtengo studentDTO
+        StudentDTO studentDTO = studentService.getStudentById(studentId);
+
+        List<TaskSubmission> taskSubmissions = taskSubmissionRepository.findByTaskId(taskId);
+        // Filtrar las entregas por el studentId
+        List<TaskSubmission> filteredSubmissions = taskSubmissions.stream()
+                .filter(submission -> submission.getStudentId().equals(studentId))
+                .toList();
+        // Convertir las entregas filtradas a DTOs
+        List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertToDTOList(filteredSubmissions);
+
+        // Construir y devolver el objeto con la tarea y las entregas filtradas
+        return TaskWithSubmissionsDTO.builder()
+                .taskId(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .type(task.getType())
+                .creationDate(task.getCreationDate())
+                .startDate(task.getStartDate())
+                .endDate(task.getEndDate())
+                .teacherId(task.getTeacherId())
+                .courseId(task.getCourseId())
+                .submissions(taskSubmissionDTOs)
+                .build();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -124,34 +193,5 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
 
 
 
-
-
-
-
-
-
-
-
-    // Obtengo una tarea con sus entregas
-    @Override
-    public TaskWithSubmissionsDTO getTaskWithSubmissions(Long taskId) {
-        Task task = taskValidator.validateTaskExists(taskId);
-        List<TaskSubmission> taskSubmissions = taskSubmissionRepository.findByTaskId(taskId);
-        List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertToDTOList(taskSubmissions);
-
-        return TaskWithSubmissionsDTO.builder()
-                .taskId(task.getId())
-                .title(task.getTitle())
-                .description(task.getDescription())
-                .type(task.getType())
-                .creationDate(task.getCreationDate())
-                .startDate(task.getStartDate())
-                .endDate(task.getEndDate())
-                .teacherComment(task.getTeacherComment())
-                .teacherId(task.getTeacherId())
-                .courseId(task.getCourseId())
-                .submissions(taskSubmissionDTOs)
-                .build();
-    }
 
 }

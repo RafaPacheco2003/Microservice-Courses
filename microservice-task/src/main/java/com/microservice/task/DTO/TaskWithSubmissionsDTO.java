@@ -22,9 +22,9 @@ public class TaskWithSubmissionsDTO {
     private Date creationDate;
     private Date startDate;
     private Date endDate;
+
     //private TaskStatus status;
     //private Double grade;
-    private String teacherComment;
     private Long teacherId;
     private Long courseId;
     private List<TaskSubmissionDTO> submissions; // Lista de entregas asociadas a la tarea

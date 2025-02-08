@@ -86,10 +86,27 @@ public class TaskStudentController {
     }
 
 
+    @GetMapping("/{studentId}/details/submmit/{taskId}")
+    public ResponseEntity<TaskWithSubmissionsDTO> getTaskWithSubmissionsForStudent(
+            @PathVariable Long taskId,
+            @PathVariable Long studentId) {
+
+        // Llamar al servicio para obtener las entregas filtradas por el studentId
+        TaskWithSubmissionsDTO taskWithSubmissions = taskSubmissionService.getTaskWithSubmissionsForStudent(studentId, taskId);
+
+        // Devolver la respuesta con el objeto TaskWithSubmissionsDTO
+        return ResponseEntity.ok(taskWithSubmissions);
+    }
+
+
+
+
+
+
 
 
     // Endpoint para calificar una entrega
-    @PostMapping("/grade/{teacherId}/{submissionId}")
+    @PutMapping("/grade/{teacherId}/{submissionId}")
     public ResponseEntity<TaskSubmissionDTO> gradeTaskSubmission(
             @PathVariable Long teacherId,
             @PathVariable Long submissionId,

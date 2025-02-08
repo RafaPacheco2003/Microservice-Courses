@@ -29,18 +29,21 @@ public class Task {
     private Date creationDate; // Date when the task was created
     private Date startDate;
     private Date endDate;
+    private Date updatedDate; // Last update date of the task
 
+    /**
+     *
 
 
     //agregar fecha de entrega
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TaskStatus status;  // Enum para el estado de la tarea
+     */
 
 
+    //private String teacherComment; // Additional comments or notes about the task
 
-    private String teacherComment; // Additional comments or notes about the task
-    private Date updatedDate; // Last update date of the task
 
 
 
