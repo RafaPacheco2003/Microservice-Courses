@@ -7,12 +7,14 @@ import com.microservice.task.util.mappers.TaskMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 public class TaskTeacherMapperImpl implements TaskMapper {
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public Task convertRequestToTask(TeacherTaskRequest taskRequest) {
+    public Task convertTeacherTaskRequestToTask(TeacherTaskRequest taskRequest) {
         Task task = new Task();
 
         task.setTitle(taskRequest.getTitle());
@@ -27,14 +29,15 @@ public class TaskTeacherMapperImpl implements TaskMapper {
     }
 
     @Override
-    public TaskDTO convertTaskToDTO(Task task) {
+    public TaskDTO convertTaskToTaskDTO(Task task) {
         return modelMapper.map(task, TaskDTO.class);
     }
 
     @Override
-    public Task prepareUpdatedTask(Long id, TeacherTaskRequest taskRequest) {
+    public Task convertUpdateTeacherTaskRequestToTaskDTO(Long id, TeacherTaskRequest taskRequest) {
         Task updatedTask = convertRequestToTask(taskRequest);
         updatedTask.setId(id);
+        updatedTask.setUpdatedDate(new Date());
         return updatedTask;
     }
 }

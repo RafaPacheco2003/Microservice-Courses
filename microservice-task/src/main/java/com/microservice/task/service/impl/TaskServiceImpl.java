@@ -57,14 +57,14 @@ public class TaskServiceImpl implements TaskService {
         CourseDTO course = courseService.getCourseById(taskRequest.getCourseId());
         TeacherDTO teacher = teacherService.getTeacherById(taskRequest.getTeacherId());
 
-        Task task = taskMapper.convertRequestToTask(taskRequest);
+        Task task = taskMapper.convertTeacherTaskRequestToTask(taskRequest);
 
         List<Long> studentIds = studentService.getStudentIdsByCourse(taskRequest.getCourseId());
 
         task.setStudentIds(studentIds);
 
         Task savedTask = taskRepository.save(task);
-        TaskDTO taskDTO = taskMapper.convertTaskToDTO(savedTask);
+        TaskDTO taskDTO = taskMapper.convertTaskToTaskDTO(savedTask);
 
         assignCourseAndTeacherNamesToDTO.assignCourseAndTeacherNamesToDTO(taskDTO, course, teacher);
 
@@ -73,13 +73,17 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskDTO updateTask(Long id, TeacherTaskRequest taskRequest) {
+
         Task task = taskValidator.validateTaskExists(id);
-        Task updatedTask = taskMapper.prepareUpdatedTask(id, taskRequest);
+
+        Task updatedTask = taskMapper.convertUpdateTeacherTaskRequestToTaskDTO(id, taskRequest);
+
         List<Long> studentIds = studentService.getStudentIdsByCourse(taskRequest.getCourseId());
+
         updatedTask.setStudentIds(studentIds);
 
         Task savedTask = taskRepository.save(updatedTask);
-        TaskDTO taskDTO = taskMapper.convertTaskToDTO(savedTask);
+        TaskDTO taskDTO = taskMapper.convertTaskToTaskDTO(savedTask);
 
         CourseDTO course = courseService.getCourseById(updatedTask.getCourseId());
         TeacherDTO teacher = teacherService.getTeacherById(updatedTask.getTeacherId());
@@ -112,7 +116,7 @@ public class TaskServiceImpl implements TaskService {
 
         return tasks.stream()
                 .map(task -> {
-                    TaskDTO taskDTO = taskMapper.convertTaskToDTO(task);
+                    TaskDTO taskDTO = taskMapper.convertTaskToTaskDTO(task);
 
                     CourseDTO course = courseService.getCourseById(task.getCourseId());
                     TeacherDTO teacher = teacherService.getTeacherById(task.getTeacherId());

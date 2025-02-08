@@ -18,7 +18,6 @@ public class TeacherTaskRequest {
     private TaskType type;
 
     private Date creationDate;
-
     private Date startDate;          // Fecha de inicio de la tarea
     private Date endDate;            // Fecha de finalización de la tarea
 

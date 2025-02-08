@@ -6,7 +6,8 @@ import com.microservice.task.http.request.teacher.TeacherTaskRequest;
 
 public interface TaskMapper {
 
-    Task convertRequestToTask(TeacherTaskRequest taskRequest);
-    TaskDTO convertTaskToDTO(Task task);
-    Task prepareUpdatedTask(Long id, TeacherTaskRequest taskRequest);
+    Task convertTeacherTaskRequestToTask(TeacherTaskRequest taskRequest);
+    TaskDTO convertTaskToTaskDTO(Task task);
+    Task convertUpdateTeacherTaskRequestToTaskDTO(Long id, TeacherTaskRequest taskRequest);
+
 }
