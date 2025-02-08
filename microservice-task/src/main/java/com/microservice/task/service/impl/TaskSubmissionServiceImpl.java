@@ -8,7 +8,6 @@ import com.microservice.task.entity.Task;
 import com.microservice.task.entity.TaskSubmission;
 import com.microservice.task.http.request.student.TaskSubmissionRequest;
 import com.microservice.task.http.request.teacher.GradeTaskRequest;
-import com.microservice.task.persistence.TaskRepository;
 import com.microservice.task.persistence.TaskSubmissionRepository;
 import com.microservice.task.service.*;
 import com.microservice.task.util.FileServiceApi;
@@ -24,29 +23,62 @@ import java.util.List;
 @Service
 public class TaskSubmissionServiceImpl implements TaskSubmissionService {
 
-    @Autowired
-    private TaskRepository taskRepository;
-
-
-    @Autowired
-    private FileServiceApi fileServiceApi;
-
-    @Autowired
-    private TaskSubmissionRepository taskSubmissionRepository;
+    private final FileServiceApi fileServiceApi;
+    private final TaskSubmissionRepository taskSubmissionRepository;
+    private final StudentService studentService;
+    private final TaskSubmissionMapper taskSubmissionMapper;
+    private final TaskValidatorService taskValidator;
+    private final TeacherService teacherService;
 
     @Autowired
-    private StudentService studentService;
+    public TaskSubmissionServiceImpl(
+            FileServiceApi fileServiceApi,
+            TaskSubmissionRepository taskSubmissionRepository,
+            StudentService studentService,
+            TaskSubmissionMapper taskSubmissionMapper,
+            TaskValidatorService taskValidator,
+            TeacherService teacherService
+    ) {
+        this.fileServiceApi = fileServiceApi;
+        this.taskSubmissionRepository = taskSubmissionRepository;
+        this.studentService = studentService;
+        this.taskSubmissionMapper = taskSubmissionMapper;
+        this.taskValidator = taskValidator;
+        this.teacherService = teacherService;
+    }
 
-    @Autowired
-    private TaskSubmissionMapper taskSubmissionMapper;
 
-    @Autowired
-    private TaskValidatorService taskValidator;
+    @Override
+    public TaskSubmissionDTO submitTaskOnce(Long studentId, Long taskId, TaskSubmissionRequest submissionRequest) {
+        // Verificamos si existe el task e igual verificamos si el usuario está inscrito en ese curso
+        Task task = taskValidator.validateTaskExists(taskId);
+        taskValidator.verifyStudentEnrolledInCourse(studentId, task, studentService);
 
-    @Autowired
-    private CourseService courseService;
-    @Autowired
-    private TeacherService teacherService;
+        // Verificamos si el estudiante ya ha entregado la tarea
+        TaskSubmission existingSubmission = taskSubmissionRepository.findByTaskIdAndStudentId(taskId, studentId);
+        if (existingSubmission != null) {
+            // Si ya existe una entrega, lanzamos una excepción
+            throw new RuntimeException("You have already submitted this task");
+        }
+
+        // Obtener el archivo PDF desde la solicitud
+        MultipartFile pdfFile = submissionRequest.getPdfFile();
+        // Guardar el archivo en el servidor y obtener la URL completa
+        String storedFilePath = saveFile(pdfFile);
+
+        // Crear la entidad de entrega de la tarea
+        TaskSubmission taskSubmission = taskSubmissionMapper.convertTaskSubmissionRequestToEntity(studentId, submissionRequest, task, storedFilePath);
+
+        taskSubmission.setSubmissionDate(new Date());
+        taskSubmission.setSubmitted(true);
+        // Guardar la entrega de la tarea en la base de datos
+        TaskSubmission savedSubmission = taskSubmissionRepository.save(taskSubmission);
+
+        // Convertir a DTO y agregar la URL del archivo
+        TaskSubmissionDTO taskSubmissionDTO = taskSubmissionMapper.convertTaskSubmissionToTaskSubmissionDTO(savedSubmission);
+
+        return taskSubmissionDTO;
+    }
 
 
     // Entrega la tarea
@@ -71,7 +103,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         TaskSubmission savedSubmission = taskSubmissionRepository.save(taskSubmission);
 
         // Convertir a DTO y agregar la URL del archivo
-        TaskSubmissionDTO taskSubmissionDTO = taskSubmissionMapper.convertToDTO(savedSubmission);
+        TaskSubmissionDTO taskSubmissionDTO = taskSubmissionMapper.convertTaskSubmissionToTaskSubmissionDTO(savedSubmission);
 
         return taskSubmissionDTO;
     }
@@ -102,7 +134,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         TaskSubmission updatedSubmission = taskSubmissionRepository.save(taskSubmission);
 
         // Convertir la entrega actualizada a DTO
-        return taskSubmissionMapper.convertToDTO(updatedSubmission);
+        return taskSubmissionMapper.convertTaskSubmissionToTaskSubmissionDTO(updatedSubmission);
     }
 
 
@@ -112,7 +144,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
     public TaskWithSubmissionsDTO getTaskWithSubmissions(Long taskId) {
         Task task = taskValidator.validateTaskExists(taskId);
         List<TaskSubmission> taskSubmissions = taskSubmissionRepository.findByTaskId(taskId);
-        List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertToDTOList(taskSubmissions);
+        List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertListTaskSubmissionToListTaskSubmissionDTO(taskSubmissions);
 
         return TaskWithSubmissionsDTO.builder()
                 .taskId(task.getId())
@@ -140,7 +172,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
                 .filter(submission -> submission.getStudentId().equals(studentId))
                 .toList();
         // Convertir las entregas filtradas a DTOs
-        List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertToDTOList(filteredSubmissions);
+        List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertListTaskSubmissionToListTaskSubmissionDTO(filteredSubmissions);
 
         // Construir y devolver el objeto con la tarea y las entregas filtradas
         return TaskWithSubmissionsDTO.builder()

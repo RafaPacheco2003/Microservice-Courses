@@ -18,7 +18,7 @@ public class TaskSubmissionMapperImpl implements TaskSubmissionMapper {
     private TaskValidatorService taskValidator;
 
     @Override
-    public TaskSubmissionDTO convertToDTO(TaskSubmission taskSubmission) {
+    public TaskSubmissionDTO convertTaskSubmissionToTaskSubmissionDTO(TaskSubmission taskSubmission) {
         TaskSubmissionDTO dto = new TaskSubmissionDTO();
         dto.setId(taskSubmission.getId());
         dto.setStudentId(taskSubmission.getStudentId());
@@ -33,9 +33,9 @@ public class TaskSubmissionMapperImpl implements TaskSubmissionMapper {
     }
 
     @Override
-    public List<TaskSubmissionDTO> convertToDTOList(List<TaskSubmission> taskSubmissions) {
+    public List<TaskSubmissionDTO> convertListTaskSubmissionToListTaskSubmissionDTO(List<TaskSubmission> taskSubmissions) {
         return taskSubmissions.stream()
-                .map(this::convertToDTO)
+                .map(this::convertTaskSubmissionToTaskSubmissionDTO)
                 .toList();
     }
 

@@ -8,9 +8,9 @@ import com.microservice.task.http.request.student.TaskSubmissionRequest;
 import java.util.List;
 
 public interface TaskSubmissionMapper {
-    TaskSubmissionDTO convertToDTO(TaskSubmission taskSubmission);
+    TaskSubmissionDTO convertTaskSubmissionToTaskSubmissionDTO(TaskSubmission taskSubmission);
 
-    List<TaskSubmissionDTO> convertToDTOList(List<TaskSubmission> taskSubmissions);
+    List<TaskSubmissionDTO> convertListTaskSubmissionToListTaskSubmissionDTO(List<TaskSubmission> taskSubmissions);
 
     TaskSubmission convertTaskSubmissionRequestToEntity(Long studentId, TaskSubmissionRequest submissionRequest, Task task, String storedFilePath);
 }

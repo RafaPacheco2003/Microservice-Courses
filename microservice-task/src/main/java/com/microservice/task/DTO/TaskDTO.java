@@ -1,5 +1,6 @@
 package com.microservice.task.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.microservice.task.entity.TaskStatus;
 import com.microservice.task.entity.TaskType;
 import lombok.AllArgsConstructor;
@@ -20,8 +21,11 @@ public class TaskDTO {
     private String title;
     private String description;
     private TaskType type;  // Enum for the task type (EXAM, ASSIGNMENT)
+    @JsonFormat(pattern = "dd/MM/yyyy")  // Formato al serializar la fecha
     private Date creationDate; // Date when the task was created
+    @JsonFormat(pattern = "dd/MM/yyyy")  // Formato al serializar la fecha
     private Date startDate;  // Date when the task starts
+    @JsonFormat(pattern = "dd/MM/yyyy")  // Formato al serializar la fecha
     private Date endDate;  // Date when the task is due
 
 

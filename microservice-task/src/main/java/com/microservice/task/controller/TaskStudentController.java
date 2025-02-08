@@ -77,7 +77,7 @@ public class TaskStudentController {
         submissionRequest.setPdfFile(pdfFile);
 
         try {
-            TaskSubmissionDTO taskSubmissionDTO = taskSubmissionService.submitTask(studentId, taskId, submissionRequest);
+            TaskSubmissionDTO taskSubmissionDTO = taskSubmissionService.submitTaskOnce(studentId, taskId, submissionRequest);
             return ResponseEntity.ok(taskSubmissionDTO);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

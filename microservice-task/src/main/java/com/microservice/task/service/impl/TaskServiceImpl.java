@@ -62,7 +62,6 @@ public class TaskServiceImpl implements TaskService {
         List<Long> studentIds = studentService.getStudentIdsByCourse(taskRequest.getCourseId());
 
         task.setStudentIds(studentIds);
-        task.setCreationDate(new Date());
 
         Task savedTask = taskRepository.save(task);
         TaskDTO taskDTO = taskMapper.convertTaskToDTO(savedTask);
