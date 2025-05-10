@@ -16,6 +16,7 @@ import java.util.List;
 public class StudentByCourseResponse {
 
     private String courseName;
+    private Long teacherId;
     private String teacher;
     private List<StudentDTO> studentDTOList;
 

@@ -94,11 +94,33 @@ public class CourseServiceImpl implements CourseService {
     //Comunicacion con el teacher
     @Override
     public List<CourseDTO> findByTeacherId(Long teacherId) {
+        // 1. Obtener todos los cursos del profesor
         List<Course> courses = courseRepository.findAllByTeacherId(teacherId);
 
+        // 2. Obtener el nombre del profesor (o "No disponible" si falla)
+        String teacherName = getTeacherNameOrFallback(teacherId);
+
+        // 3. Convertir cursos a DTOs y asignar el nombre del profesor
         return courses.stream()
-                .map(course -> modelMapper.map(course, CourseDTO.class))
+                .map(course -> createCourseDtoWithTeacherName(course, teacherName))
                 .collect(Collectors.toList());
+    }
+
+    // Método auxiliar para obtener el nombre del profesor
+    private String getTeacherNameOrFallback(Long teacherId) {
+        try {
+            TeacherDTO teacher = teacherClient.getTeacher(teacherId);
+            return teacher != null ? teacher.getName() : "No disponible";
+        } catch (Exception e) {
+            return "No disponible";
+        }
+    }
+
+    // Método auxiliar para crear el DTO con el nombre del profesor
+    private CourseDTO createCourseDtoWithTeacherName(Course course, String teacherName) {
+        CourseDTO dto = modelMapper.map(course, CourseDTO.class);
+        dto.setTeacherName(teacherName);
+        return dto;
     }
 
     @Override
@@ -121,6 +143,7 @@ public class CourseServiceImpl implements CourseService {
         return StudentByCourseResponse.builder()
                 .courseName(course.getName())
                 .teacher(course.getTeacher())
+                .teacherId(course.getTeacherId())
                 .studentDTOList(studentDTOList)
                 .build();
     }

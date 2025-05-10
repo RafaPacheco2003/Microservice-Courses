@@ -1,6 +1,8 @@
 package com.microservice.task.util.mappers.impl;
 
+import com.microservice.task.DTO.StudentDTO;
 import com.microservice.task.DTO.TaskSubmissionDTO;
+import com.microservice.task.client.StudentClient;
 import com.microservice.task.entity.Task;
 import com.microservice.task.entity.TaskSubmission;
 import com.microservice.task.http.request.student.TaskSubmissionRequest;
@@ -16,12 +18,24 @@ public class TaskSubmissionMapperImpl implements TaskSubmissionMapper {
 
     @Autowired
     private TaskValidatorService taskValidator;
+    @Autowired
+    private StudentClient studentClient; // Inyecta el Feign Client
 
     @Override
     public TaskSubmissionDTO convertTaskSubmissionToTaskSubmissionDTO(TaskSubmission taskSubmission) {
         TaskSubmissionDTO dto = new TaskSubmissionDTO();
         dto.setId(taskSubmission.getId());
         dto.setStudentId(taskSubmission.getStudentId());
+
+        // Obtener el nombre del estudiante del microservicio de estudiantes
+        try {
+            StudentDTO studentDTO = studentClient.searchStudent(taskSubmission.getStudentId());
+            dto.setNameStudent(studentDTO.getName() + " " + studentDTO.getLastName());
+        } catch (Exception e) {
+            dto.setNameStudent("Nombre no disponible");
+            // Puedes loggear el error si es necesario
+        }
+
         dto.setSubmitted(taskSubmission.isSubmitted());
         dto.setStudentComment(taskSubmission.getStudentComment());
         dto.setGrade(taskSubmission.getGrade());
@@ -29,6 +43,8 @@ public class TaskSubmissionMapperImpl implements TaskSubmissionMapper {
         dto.setTeacherComment(taskSubmission.getTeacherComment());
         dto.setSubmissionDate(taskSubmission.getSubmissionDate());
         dto.setSubmittedPdfFilePath(taskSubmission.getPdfFile());
+        dto.setLate(taskSubmission.isLate());
+
         return dto;
     }
 

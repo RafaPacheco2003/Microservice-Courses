@@ -35,7 +35,7 @@ public class TaskTeacherMapperImpl implements TaskMapper {
 
     @Override
     public Task convertUpdateTeacherTaskRequestToTaskDTO(Long id, TeacherTaskRequest taskRequest) {
-        Task updatedTask = convertRequestToTask(taskRequest);
+        Task updatedTask = convertTeacherTaskRequestToTask(taskRequest);
         updatedTask.setId(id);
         updatedTask.setUpdatedDate(new Date());
         return updatedTask;

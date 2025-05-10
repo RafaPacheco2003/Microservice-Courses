@@ -19,7 +19,7 @@
     - [x] Eliminar curso.
     - [x] Ver qué alumnos están inscritos en un curso.
     - [x] Asignar profesores a cursos.
-    - [ ] Ver las tareas asociadas a un curso.(Se realiza en el microservicios task)
+    - [1] Ver las tareas asociadas a un curso.(Se realiza en el microservicios task)
     - [x] Ver qué profesor tiene asignado un curso.
 
 3. **Teacher Service**:

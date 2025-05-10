@@ -26,6 +26,8 @@ public class TaskWithSubmissionsDTO {
     //private TaskStatus status;
     //private Double grade;
     private Long teacherId;
+    private String teacherName;
     private Long courseId;
+    private String courseName;
     private List<TaskSubmissionDTO> submissions; // Lista de entregas asociadas a la tarea
 }

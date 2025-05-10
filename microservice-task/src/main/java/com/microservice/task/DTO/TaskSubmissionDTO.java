@@ -8,6 +8,7 @@ import java.util.Date;
 public class TaskSubmissionDTO {
     private Long id;
     private Long studentId;
+    private String nameStudent;
 
     private Date submissionDate;
     private boolean submitted;

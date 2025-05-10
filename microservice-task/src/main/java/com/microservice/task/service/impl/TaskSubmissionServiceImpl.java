@@ -1,9 +1,6 @@
 package com.microservice.task.service.impl;
 
-import com.microservice.task.DTO.StudentDTO;
-import com.microservice.task.DTO.TaskSubmissionDTO;
-import com.microservice.task.DTO.TaskWithSubmissionsDTO;
-import com.microservice.task.DTO.TeacherDTO;
+import com.microservice.task.DTO.*;
 import com.microservice.task.entity.Task;
 import com.microservice.task.entity.TaskSubmission;
 import com.microservice.task.http.request.student.TaskSubmissionRequest;
@@ -29,6 +26,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
     private final TaskSubmissionMapper taskSubmissionMapper;
     private final TaskValidatorService taskValidator;
     private final TeacherService teacherService;
+    private final CourseService courseService;
 
     @Autowired
     public TaskSubmissionServiceImpl(
@@ -37,7 +35,8 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
             StudentService studentService,
             TaskSubmissionMapper taskSubmissionMapper,
             TaskValidatorService taskValidator,
-            TeacherService teacherService
+            TeacherService teacherService,
+            CourseService courseService
     ) {
         this.fileServiceApi = fileServiceApi;
         this.taskSubmissionRepository = taskSubmissionRepository;
@@ -45,6 +44,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         this.taskSubmissionMapper = taskSubmissionMapper;
         this.taskValidator = taskValidator;
         this.teacherService = teacherService;
+        this.courseService = courseService;
     }
 
 
@@ -54,12 +54,13 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         Task task = taskValidator.validateTaskExists(taskId);
         taskValidator.verifyStudentEnrolledInCourse(studentId, task, studentService);
 
-        // Verificamos si el estudiante ya ha entregado la tarea
+
+        /*Verificamos si el estudiante ya ha entregado la tarea
         TaskSubmission existingSubmission = taskSubmissionRepository.findByTaskIdAndStudentId(taskId, studentId);
         if (existingSubmission != null) {
             // Si ya existe una entrega, lanzamos una excepción
             throw new RuntimeException("You have already submitted this task");
-        }
+        }*/
 
         // Obtener el archivo PDF desde la solicitud
         MultipartFile pdfFile = submissionRequest.getPdfFile();
@@ -71,6 +72,11 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
 
         taskSubmission.setSubmissionDate(new Date());
         taskSubmission.setSubmitted(true);
+
+
+        if(taskSubmission.getSubmissionDate().before(task.getStartDate())){
+            taskSubmission.setLate(true);
+        }
         // Guardar la entrega de la tarea en la base de datos
         TaskSubmission savedSubmission = taskSubmissionRepository.save(taskSubmission);
 
@@ -81,7 +87,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
     }
 
 
-    // Entrega la tarea
+    /* Entrega la tarea
     @Override
     public TaskSubmissionDTO submitTask(Long studentId, Long taskId, TaskSubmissionRequest submissionRequest) {
 
@@ -106,7 +112,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         TaskSubmissionDTO taskSubmissionDTO = taskSubmissionMapper.convertTaskSubmissionToTaskSubmissionDTO(savedSubmission);
 
         return taskSubmissionDTO;
-    }
+    }*/
 
 
     @Override
@@ -145,6 +151,8 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         Task task = taskValidator.validateTaskExists(taskId);
         List<TaskSubmission> taskSubmissions = taskSubmissionRepository.findByTaskId(taskId);
         List<TaskSubmissionDTO> taskSubmissionDTOs = taskSubmissionMapper.convertListTaskSubmissionToListTaskSubmissionDTO(taskSubmissions);
+        TeacherDTO teacherDTO = teacherService.getTeacherById(task.getTeacherId());
+        CourseDTO courseDTO = courseService.getCourseById(task.getCourseId());
 
         return TaskWithSubmissionsDTO.builder()
                 .taskId(task.getId())
@@ -155,7 +163,9 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
                 .startDate(task.getStartDate())
                 .endDate(task.getEndDate())
                 .teacherId(task.getTeacherId())
+                .teacherName(teacherDTO.getName())
                 .courseId(task.getCourseId())
+                .courseName(courseDTO.getName())
                 .submissions(taskSubmissionDTOs)
                 .build();
     }

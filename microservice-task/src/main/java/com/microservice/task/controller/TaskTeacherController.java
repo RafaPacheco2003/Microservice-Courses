@@ -1,7 +1,9 @@
 package com.microservice.task.controller;
 
 import com.microservice.task.DTO.TaskDTO;
+import com.microservice.task.DTO.TaskSubmissionDTO;
 import com.microservice.task.DTO.TaskWithSubmissionsDTO;
+import com.microservice.task.http.request.teacher.GradeTaskRequest;
 import com.microservice.task.http.request.teacher.TeacherTaskRequest;
 import com.microservice.task.service.TaskService;
 import com.microservice.task.service.TaskSubmissionService;
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/task")
+@RequestMapping("/api/task/teacher")
 public class TaskTeacherController {
 
     @Autowired
@@ -68,7 +70,19 @@ public class TaskTeacherController {
     }
 
 
+    // Endpoint para calificar una entrega
+    @PutMapping("/grade/{teacherId}/{submissionId}")
+    public ResponseEntity<TaskSubmissionDTO> gradeTaskSubmission(
+            @PathVariable Long teacherId,
+            @PathVariable Long submissionId,
+            @RequestBody GradeTaskRequest gradeRequest) {
 
+        // Llamar al servicio para calificar la entrega
+        TaskSubmissionDTO updatedSubmission = taskSubmissionService.gradeTaskSubmission(teacherId, submissionId, gradeRequest);
+
+        // Devolver la respuesta con el DTO actualizado
+        return ResponseEntity.ok(updatedSubmission);
+    }
 
 
 
